@@ -17,6 +17,12 @@ from database.cleanup_manager import CleanupManager
 TIMEZONE = pytz.timezone("Asia/Kolkata")
 
 
+def _effective_symbols() -> list[str]:
+    if settings.TEST_MODE and settings.TEST_SYMBOLS:
+        return settings.TEST_SYMBOLS
+    return SYMBOLS
+
+
 def print_feature_flags() -> None:
     print("Feature Flags")
     print("-------------")
@@ -30,6 +36,9 @@ def print_feature_flags() -> None:
     print(f"ENABLE_CALIBRATION={settings.ENABLE_CALIBRATION}")
     print(f"CALIBRATION_MIN_SAMPLES={settings.CALIBRATION_MIN_SAMPLES}")
     print(f"OPTION_CHAIN_STRIKE_COUNT={settings.OPTION_CHAIN_STRIKE_COUNT}\n")
+    print(f"TEST_INTERVAL_MINUTES={settings.TEST_INTERVAL_MINUTES}")
+    print(f"TEST_SYMBOLS={settings.TEST_SYMBOLS if settings.TEST_SYMBOLS else 'ALL_DEFAULT'}")
+    print(f"EFFECTIVE_SYMBOLS={_effective_symbols()}\n")
 
 
 def job():
@@ -37,7 +46,7 @@ def job():
     print("\n===========================================")
     print(f"Running Market Cycle at {now}")
     print("===========================================\n")
-    for symbol in SYMBOLS:
+    for symbol in _effective_symbols():
         print(f"Processing {symbol}...\n")
         run_option_chain(symbol)
     print("\nCycle Completed\n")
@@ -48,9 +57,17 @@ if __name__ == "__main__":
     print_feature_flags()
 
     if settings.TEST_MODE:
-        scheduler.add_job(job, CronTrigger(minute="*"), misfire_grace_time=30)
+        interval = settings.TEST_INTERVAL_MINUTES
+        scheduler.add_job(
+            job,
+            "interval",
+            minutes=interval,
+            max_instances=1,
+            coalesce=True,
+            misfire_grace_time=60,
+        )
         print("TEST MODE ENABLED")
-        print("Running every 1 minute (No market time restriction)\n")
+        print(f"Running every {interval} minute(s) (No market time restriction)\n")
     else:
         scheduler.add_job(
             job,

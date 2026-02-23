@@ -11,6 +11,8 @@ Template: `.env.example`
 - `FYERS_ACCESS_TOKEN`: active access token used for API calls.
 - `TIMEZONE`: runtime timezone (default `Asia/Kolkata`).
 - `TEST_MODE`: `True`/`False`; test mode skips key DB writes in engine flow.
+- `TEST_INTERVAL_MINUTES`: test-mode scheduler interval in minutes (default `3`).
+- `TEST_SYMBOLS`: optional comma-separated symbol list for test mode (example: `NSE:NIFTYBANK-INDEX`).
 
 ## Database
 - `DB_NAME`: PostgreSQL database name.
@@ -51,6 +53,12 @@ Template: `.env.example`
 - `TEST_MODE=False`
 - `ENABLE_GUARDRAILS=True`
 - Enable remaining flags one by one.
+
+### Lean Test Mode
+- `TEST_MODE=True`
+- `TEST_INTERVAL_MINUTES=3`
+- `TEST_SYMBOLS=NSE:NIFTYBANK-INDEX`
+- Keep advanced enhancement flags disabled for isolated tests.
 
 ### Full Enhanced Mode
 - `TEST_MODE=False`

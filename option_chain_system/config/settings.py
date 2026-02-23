@@ -20,6 +20,10 @@ class Settings:
         self.FYERS_ACCESS_TOKEN: str = os.getenv("FYERS_ACCESS_TOKEN", "")
         self.TIMEZONE: str = os.getenv("TIMEZONE", "Asia/Kolkata")
         self.TEST_MODE: bool = os.getenv("TEST_MODE", "False") == "True"
+        self.TEST_INTERVAL_MINUTES: int = max(1, int(os.getenv("TEST_INTERVAL_MINUTES", 3)))
+        self.TEST_SYMBOLS: list[str] = [
+            s.strip() for s in os.getenv("TEST_SYMBOLS", "").split(",") if s.strip()
+        ]
         self.DATA_RETENTION_DAYS: int = int(os.getenv("DATA_RETENTION_DAYS", 7))
         self.OPTION_CHAIN_STRIKE_COUNT: int = int(os.getenv("OPTION_CHAIN_STRIKE_COUNT", 40))
         self.ENABLE_ALL_ENHANCEMENTS: bool = os.getenv("ENABLE_ALL_ENHANCEMENTS", "False") == "True"
