@@ -417,4 +417,7 @@ def run_option_chain(symbol: str) -> None:
     )
 
     subject_line = f"{'[TEST MODE] ' if settings.TEST_MODE else ''}10-Min Option Chain Report - {symbol}"
-    EmailService.send_email(subject=subject_line, body=report_html)
+    if settings.TEST_MODE and (not settings.ENABLE_EMAIL_IN_TEST):
+        print("TEST MODE: Email sending skipped (ENABLE_EMAIL_IN_TEST=False).")
+    else:
+        EmailService.send_email(subject=subject_line, body=report_html)

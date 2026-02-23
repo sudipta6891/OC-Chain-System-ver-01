@@ -34,6 +34,7 @@ class Settings:
         self.ENABLE_OUTCOME_TRACKING: bool = os.getenv("ENABLE_OUTCOME_TRACKING", "False") == "True"
         self.ENABLE_CALIBRATION: bool = os.getenv("ENABLE_CALIBRATION", "False") == "True"
         self.CALIBRATION_MIN_SAMPLES: int = int(os.getenv("CALIBRATION_MIN_SAMPLES", 30))
+        self.ENABLE_EMAIL_IN_TEST: bool = os.getenv("ENABLE_EMAIL_IN_TEST", "False") == "True"
 
         if self.ENABLE_ALL_ENHANCEMENTS:
             self.ENABLE_GUARDRAILS = True
