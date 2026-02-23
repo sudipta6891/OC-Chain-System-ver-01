@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Virtual environments
+.venv/
+venv/
+option_chain_system/venv/
+
+# Environment and secrets
+.env
+option_chain_system/.env
+
+# Logs and runtime artifacts
+*.log
+fyersApi.log
+fyersRequests.log
+option_chain_system/fyersApi.log
+option_chain_system/fyersRequests.log
+
+# OS/editor artifacts
+.DS_Store
+Thumbs.db
+
+# Binary/document artifacts outside source scope
+*.docx
+*.pdf
+~$*
