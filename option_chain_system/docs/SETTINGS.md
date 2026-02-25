@@ -13,6 +13,7 @@ Template: `.env.example`
 - `TEST_MODE`: `True`/`False`; test mode skips key DB writes in engine flow.
 - `TEST_INTERVAL_MINUTES`: test-mode scheduler interval in minutes (default `3`).
 - `TEST_SYMBOLS`: optional comma-separated symbol list for test mode (example: `NSE:NIFTYBANK-INDEX`).
+- `WEB_HISTORY_LIMIT`: max historical snapshots shown in web viewer (default `20`).
 
 ## Database
 - `DB_NAME`: PostgreSQL database name.
@@ -20,11 +21,6 @@ Template: `.env.example`
 - `DB_PASSWORD`: PostgreSQL password.
 - `DB_HOST`: PostgreSQL host (default `localhost`).
 - `DB_PORT`: PostgreSQL port (default `5432`).
-
-## Email
-- `EMAIL_SENDER`: sender email account.
-- `EMAIL_APP_PASSWORD`: app password for SMTP auth.
-- `EMAIL_RECIPIENTS`: comma/newline-separated recipient list.
 
 ## Data Retention and Fetch
 - `DATA_RETENTION_DAYS`: cleanup retention window.

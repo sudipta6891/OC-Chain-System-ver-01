@@ -60,7 +60,7 @@ This document maps every source/settings file in `option_chain_system` to its pu
 
 ## Reporting
 - `reporting/report_builder.py`: HTML report composition.
-- `reporting/email_service.py`: SMTP sender.
+- `reporting/report_web_store.py`: web report persistence and history index generation.
 
 ## Backtesting
 - `backtesting/walk_forward_backtester.py`: trade-path simulation, metrics, drawdown.

@@ -21,6 +21,7 @@ class Settings:
         self.TIMEZONE: str = os.getenv("TIMEZONE", "Asia/Kolkata")
         self.TEST_MODE: bool = os.getenv("TEST_MODE", "False") == "True"
         self.TEST_INTERVAL_MINUTES: int = max(1, int(os.getenv("TEST_INTERVAL_MINUTES", 3)))
+        self.WEB_HISTORY_LIMIT: int = max(1, int(os.getenv("WEB_HISTORY_LIMIT", 20)))
         self.TEST_SYMBOLS: list[str] = [
             s.strip() for s in os.getenv("TEST_SYMBOLS", "").split(",") if s.strip()
         ]
@@ -34,7 +35,6 @@ class Settings:
         self.ENABLE_OUTCOME_TRACKING: bool = os.getenv("ENABLE_OUTCOME_TRACKING", "False") == "True"
         self.ENABLE_CALIBRATION: bool = os.getenv("ENABLE_CALIBRATION", "False") == "True"
         self.CALIBRATION_MIN_SAMPLES: int = int(os.getenv("CALIBRATION_MIN_SAMPLES", 30))
-        self.ENABLE_EMAIL_IN_TEST: bool = os.getenv("ENABLE_EMAIL_IN_TEST", "False") == "True"
 
         if self.ENABLE_ALL_ENHANCEMENTS:
             self.ENABLE_GUARDRAILS = True
@@ -50,11 +50,6 @@ class Settings:
         self.DB_PASSWORD: str = os.getenv("DB_PASSWORD", "")
         self.DB_HOST: str = os.getenv("DB_HOST", "localhost")
         self.DB_PORT: str = os.getenv("DB_PORT", "5432")
-
-        # Email Config
-        self.EMAIL_SENDER: str = os.getenv("EMAIL_SENDER", "")
-        self.EMAIL_APP_PASSWORD: str = os.getenv("EMAIL_APP_PASSWORD", "")
-        self.EMAIL_RECIPIENTS: str = os.getenv("EMAIL_RECIPIENTS", "")
 
 
 

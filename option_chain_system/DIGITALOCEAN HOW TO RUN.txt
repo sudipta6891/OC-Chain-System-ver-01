@@ -1,0 +1,99 @@
+powershell -ExecutionPolicy Bypass -File .\ops\droplet-manage.ps1 -Action deploy -Mode prod
+powershell -ExecutionPolicy Bypass -File .\ops\droplet-manage.ps1 -Action mode -Mode test
+powershell -ExecutionPolicy Bypass -File .\ops\droplet-manage.ps1 -Action mode -Mode prod
+powershell -ExecutionPolicy Bypass -File .\ops\droplet-manage.ps1 -Action status
+powershell -ExecutionPolicy Bypass -File .\ops\droplet-manage.ps1 -Action logs
+
+**CTRL+D TO STOP SSH
+
+Done. One-click VS Code tasks are added:
+
+tasks.json
+Use them from VS Code:
+
+
+Terminal: Run Task
+Choose one:
+OC: Deploy Prod
+OC: Deploy Test
+OC: Switch Mode Prod
+OC: Switch Mode Test
+OC: Service Status
+OC: Service Logs
+OC: Service Start
+OC: Service Stop
+OC: Runtime Check (Skip DB)
+
+--------------------------------------------
+OC: Deploy Prod / OC: Deploy Test are full deployment workflows.
+OC: Service Start / OC: Service Stop are only service control.
+
+Difference clearly:
+
+OC: Deploy Prod
+Uploads local .env to droplet
+Pulls latest GitHub code
+Reinstalls/updates Python deps
+Applies DB schema
+Sets mode to production
+Restarts service
+Use when starting day / after code or env change
+OC: Deploy Test
+Same as above, but sets test mode profile
+Use when you want safe test run on server
+OC: Service Start
+Only runs systemctl start oc-chain
+No git pull, no env upload, no schema apply
+Use when everything already deployed and you just want to start it
+OC: Service Stop
+Only runs systemctl stop oc-chain
+Use before shutting droplet down or pausing execution
+Easy rule:
+
+Config/code changed? -> use Deploy Prod/Test
+Only run/pause needed? -> use Service Start/Stop
+
+
+TO CHECK --> ENABLE_ALL_ENHANCEMENTS value
+ssh root@143.110.241.235 "grep -E '^(TEST_MODE|ENABLE_ALL_ENHANCEMENTS)=' /opt/oc-chain/option_chain_system/.env"
+-----------------------------------------------------------------------------------------------------------------
+Power on droplet in DigitalOcean.
+Wait 20-30 seconds.
+In VS Code terminal (project root), run:
+powershell -ExecutionPolicy Bypass -File .\ops\droplet-manage.ps1 -Action deploy -Mode prod
+Check services:
+powershell -ExecutionPolicy Bypass -File .\ops\droplet-manage.ps1 -Action status
+powershell -ExecutionPolicy Bypass -File .\ops\droplet-manage.ps1 -Action webstatus
+Open report UI:
+http://143.110.241.235:8080
+If needed, view logs:
+powershell -ExecutionPolicy Bypass -File .\ops\droplet-manage.ps1 -Action logs
+powershell -ExecutionPolicy Bypass -File .\ops\droplet-manage.ps1 -Action weblogs
+End of day:
+
+Stop scheduler:
+powershell -ExecutionPolicy Bypass -File .\ops\droplet-manage.ps1 -Action stop
+Optional stop web viewer:
+powershell -ExecutionPolicy Bypass -File .\ops\droplet-manage.ps1 -Action webstop
+Power off droplet from DO panel.
+Fastest daily routine:
+
+Morning: just run deploy -Mode prod
+Evening: run stop and power off.
+--------------------------------------------------------------
+Fastest way:
+
+Run task OC: Generate FYERS Token (Droplet).
+In terminal, copy the printed access token.
+Open option_chain_system/.env.
+Find line:
+FYERS_ACCESS_TOKEN=...
+Replace everything after = with copied token.
+Save file.
+Then deploy:
+
+powershell -ExecutionPolicy Bypass -File .\ops\droplet-manage.ps1 -Action deploy -Mode prod
+Tip:
+
+Keep token in single line, no quotes, no spaces before/after.
+If token wrapping happens in terminal copy, paste into Notepad once, then copy clean single-line token to .env.

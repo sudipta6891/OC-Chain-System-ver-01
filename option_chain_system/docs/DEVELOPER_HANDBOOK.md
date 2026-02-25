@@ -21,7 +21,7 @@ Option Chain System is an automated option-chain analytics pipeline for index op
 Core capabilities:
 - Fetches spot and option-chain data from FYERS.
 - Runs multi-layer analytics (OI/PCR, breakout, bias, Greeks, timing, regime).
-- Produces report emails.
+- Produces HTML reports for web viewing.
 - Persists snapshots/summaries/signals/outcomes in PostgreSQL.
 - Supports historical replay and walk-forward backtesting.
 
@@ -37,7 +37,7 @@ High-level runtime path:
    - calibration
    - outcome tracking
 4. Repositories in `database/` write snapshots/summaries/signals/outcomes.
-5. `reporting/report_builder.py` composes report and `reporting/email_service.py` sends it.
+5. `reporting/report_builder.py` composes report and `reporting/report_web_store.py` stores it for web viewing.
 6. `scheduler.py` executes per market schedule.
 
 ## 3) Setup and Installation
@@ -65,8 +65,6 @@ Important runtime variables:
   - `TIMEZONE`, `TEST_MODE`, `DATA_RETENTION_DAYS`, `OPTION_CHAIN_STRIKE_COUNT`
 - DB:
   - `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`
-- Email:
-  - `EMAIL_SENDER`, `EMAIL_APP_PASSWORD`, `EMAIL_RECIPIENTS`
 
 Feature flags:
 - `ENABLE_ALL_ENHANCEMENTS`:
@@ -187,7 +185,7 @@ Database repos/utilities:
 
 Reporting:
 - `reporting/report_builder.py`
-- `reporting/email_service.py`
+- `reporting/report_web_store.py`
 
 Backtesting:
 - `backtesting/walk_forward_backtester.py`
@@ -294,12 +292,6 @@ DB_PASSWORD=
 DB_HOST=localhost
 DB_PORT=5432
 
-# ------------------------------
-# Email
-# ------------------------------
-EMAIL_SENDER=
-EMAIL_APP_PASSWORD=
-EMAIL_RECIPIENTS=
 ```
 
 ### `.env.full_mode.example`

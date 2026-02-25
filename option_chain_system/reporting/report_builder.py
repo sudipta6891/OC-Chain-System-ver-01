@@ -88,7 +88,9 @@ class ReportBuilder:
             <tr><td><b>Resistance</b></td><td>{resistance}</td></tr>
             <tr><td><b>Support</b></td><td>{support}</td></tr>
             <tr><td><b>Max Pain</b></td><td>{max_pain}</td></tr>
+            <tr><td><b>Max Pain Insight</b></td><td>{maxpain_note}</td></tr>
             <tr><td><b>PCR</b></td><td>{pcr}</td></tr>
+            <tr><td><b>PCR Interpretation</b></td><td>{pcr_note}</td></tr>
         </table>
 
         <hr>
@@ -170,7 +172,6 @@ class ReportBuilder:
 
         <hr>
         <h3>Data Quality Guardrails</h3>
-        <p><b>PCR Interpretation:</b> {pcr_note}<br><b>Max Pain Insight:</b> {maxpain_note}</p>
         <b>Warnings:</b><ul>{quality_warn}</ul>
         <b>Anomaly Flags:</b><ul>{quality_flags}</ul>
 

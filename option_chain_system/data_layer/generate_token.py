@@ -5,6 +5,9 @@ Run this script manually to generate access token.
 After generation, paste token into .env file.
 """
 
+import argparse
+import sys
+
 from fyers_apiv3 import fyersModel
 from config.settings import settings
 
@@ -57,12 +60,42 @@ def generate_access_token(auth_code: str) -> None:
     print("\nCopy this token and paste into .env as FYERS_ACCESS_TOKEN\n")
 
 
+def _read_auth_code_interactive() -> str:
+    try:
+        auth_code_input = input("Enter auth_code from redirected URL: ")
+    except EOFError as exc:
+        raise RuntimeError(
+            "No interactive stdin available for auth_code input. "
+            "Run with --auth-code '<value>' instead."
+        ) from exc
+    return auth_code_input.strip()
+
+
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="FYERS access token helper")
+    parser.add_argument(
+        "--auth-code",
+        dest="auth_code",
+        help="Auth code copied from FYERS redirected URL",
+    )
+    parser.add_argument(
+        "--print-auth-url",
+        action="store_true",
+        help="Only print login URL and exit",
+    )
+    args = parser.parse_args()
 
     print("STEP 1: Generate Login URL\n")
     generate_auth_code()
 
-    auth_code_input = input("Enter auth_code from redirected URL: ")
+    if args.print_auth_url:
+        sys.exit(0)
+
+    auth_code_input = (args.auth_code or "").strip()
+    if not auth_code_input:
+        auth_code_input = _read_auth_code_interactive()
+    if not auth_code_input:
+        raise ValueError("auth_code is empty. Copy the value from redirected URL and retry.")
 
     print("\nSTEP 2: Generating Access Token...\n")
     generate_access_token(auth_code_input)

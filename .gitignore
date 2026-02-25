@@ -20,6 +20,7 @@ fyersApi.log
 fyersRequests.log
 option_chain_system/fyersApi.log
 option_chain_system/fyersRequests.log
+option_chain_system/reports/
 
 # OS/editor artifacts
 .DS_Store
@@ -29,3 +30,4 @@ Thumbs.db
 *.docx
 *.pdf
 ~$*
+option_chain_system/twilio_2FA_recovery_code.txt

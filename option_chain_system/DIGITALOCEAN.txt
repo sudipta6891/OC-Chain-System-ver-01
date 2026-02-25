@@ -1,0 +1,68 @@
+ssh-keygen -t ed25519 -C "digitalocean"
+(.venv) PS E:\FYERS ALGO TRADING\oc store> ssh-keygen -t ed25519 -C "digitalocean"
+Generating public/private ed25519 key pair.
+Enter file in which to save the key (C:\Users\Sudipta Bhattacharya/.ssh/id_ed25519): 
+Enter passphrase (empty for no passphrase): 
+Enter same passphrase again: 
+Your identification has been saved in C:\Users\Sudipta Bhattacharya/.ssh/id_ed25519
+Your public key has been saved in C:\Users\Sudipta Bhattacharya/.ssh/id_ed25519.pub
+The key fingerprint is:
+SHA256:K3hqf0YFXcHav6JHO2NNx0ChB9DFjY6ZX3CUK4NjHEw digitalocean
+The key's randomart image is:
++--[ED25519 256]--+
+|         .+E++o=o|
+|        . .ooo=.o|
+|         ..o+*.o.|
+|          o==+o..|
+|        S.. .oo+ |
+|     .  ..  . + o|
+|    . o..  . + o |
+|    .o .o   B o  |
+|   ....o  .+ +   |
++----[SHA256]-----+
+(.venv) PS E:\FYERS ALGO TRADING\oc store> ^C
+(.venv) PS E:\FYERS ALGO TRADING\oc store> \
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEWPG6BEPTigiosQGy6kSCXjyM0YKWXe14ZAsZ+0LH6H digitalocean
+
+NAME:-oc-chain-local-key
+
+Yes, I completed the migration on your droplet.
+
+Completed on 143.110.241.235
+
+Ubuntu setup:
+Updated/Upgraded packages
+Installed python3, python3-venv, python3-pip, git, postgresql, postgresql-contrib
+Timezone set to Asia/Kolkata
+Added 2GB swap
+Project deploy:
+Cloned repo to: /opt/oc-chain
+Created venv at: /opt/oc-chain/option_chain_system/.venv
+Installed requirements
+PostgreSQL:
+Created DB: oc_chain_db
+Created user: oc_chain_user
+Password set: OcChain@2026#Db
+Granted privileges
+Env/config:
+Uploaded your local .env to droplet
+Normalized production values:
+TEST_MODE=False
+ENABLE_ALL_ENHANCEMENTS=True
+DB host/user/db set to local Postgres
+CALIBRATION_MIN_SAMPLES=30
+OPTION_CHAIN_STRIKE_COUNT=40
+Schema/runtime:
+Applied schema
+Fixed missing scalp_score_tracking + ownership/permissions
+check_runtime.py now passes (Database Check: OK)
+Service:
+Created systemd service: oc-chain.service
+Enabled and started it
+Current status: active (running)
+
+Useful commands for you
+
+ssh root@143.110.241.235
+systemctl status oc-chain --no-pager
+journalctl -u oc-chain -f

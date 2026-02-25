@@ -157,6 +157,24 @@
       "problemMatcher": []
     },
     {
+      "label": "OC: Full Stop",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        ".\\ops\\droplet-manage.ps1",
+        "-Action",
+        "fullstop"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "OC: Runtime Check (Skip DB)",
       "type": "shell",
       "command": "powershell",
@@ -173,7 +191,97 @@
         "panel": "shared"
       },
       "problemMatcher": []
+    },
+    {
+      "label": "OC: Web Start",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        ".\\ops\\droplet-manage.ps1",
+        "-Action",
+        "webstart"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "OC: Web Stop",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        ".\\ops\\droplet-manage.ps1",
+        "-Action",
+        "webstop"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "OC: Web Status",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        ".\\ops\\droplet-manage.ps1",
+        "-Action",
+        "webstatus"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "OC: Web Logs",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        ".\\ops\\droplet-manage.ps1",
+        "-Action",
+        "weblogs"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "OC: Generate FYERS Token (Droplet)",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        ".\\ops\\droplet-manage.ps1",
+        "-Action",
+        "token"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": true
+      },
+      "problemMatcher": []
     }
   ]
 }
-

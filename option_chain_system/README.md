@@ -5,7 +5,7 @@ Automated option-chain analytics and reporting pipeline for index options.
 ## What This Project Does
 - Fetches spot and option-chain data from FYERS.
 - Computes analytics signals (OI/PCR, breakout, bias, Greeks, timing, regime).
-- Generates actionable report email output.
+- Generates actionable HTML web reports.
 - Stores snapshots and derived signals in PostgreSQL.
 - Tracks trade outcomes and supports walk-forward backtesting.
 
@@ -26,6 +26,9 @@ Automated option-chain analytics and reporting pipeline for index options.
    - `python check_runtime.py --apply-missing-schema`
 5. Start scheduler:
    - `python scheduler.py`
+6. View reports in browser:
+   - `python serve_reports.py --host 127.0.0.1 --port 8080`
+   - open `http://127.0.0.1:8080`
 
 ## Modes
 - Progressive flags (recommended during rollout):
@@ -35,4 +38,5 @@ Automated option-chain analytics and reporting pipeline for index options.
 
 ## Notes
 - Keep `TEST_MODE=False` when you need DB writes for signal/outcome tracking.
+- Every cycle also writes HTML report files under `reports/web/` for web viewing.
 - `venv/` and `__pycache__/` are runtime artifacts and are not part of source documentation scope.

@@ -5,7 +5,7 @@ Flow:
 1) Fetch and basic analytics
 2) Data quality and optional enhanced models
 3) Optional signal persistence/outcome labeling
-4) Report generation and email delivery
+4) Report generation and web persistence
 """
 
 from data_layer.data_fetcher import OptionChainFetcher
@@ -27,7 +27,7 @@ from analytics.market_regime_engine import MarketRegimeEngine
 from analytics.otm_timing_engine_v2 import OTMTimingEngineV2
 from analytics.dynamic_otm_selector import DynamicOTMSelector
 from reporting.report_builder import ReportBuilder
-from reporting.email_service import EmailService
+from reporting.report_web_store import ReportWebStore
 from database.snapshot_repository import SnapshotRepository
 from database.summary_repository import SummaryRepository
 from database.scalp_repository import ScalpRepository
@@ -375,6 +375,10 @@ def run_option_chain(symbol: str) -> None:
     )
     maxpain_note = "Near max pain range magnet" if abs(spot - max_pain) / max(1.0, spot) < 0.0015 else "Away from max pain"
 
+    final_side = side if side in ("CE", "PE") else "NO TRADE"
+    has_valid_strike = dynamic_pick.get("strike") is not None
+    final_allow_trade = bool(timing_data["allow_trade"] and quality.is_usable and final_side in ("CE", "PE") and has_valid_strike)
+
     report_html = report_builder.build_html_report(
         symbol,
         spot,
@@ -405,19 +409,20 @@ def run_option_chain(symbol: str) -> None:
         },
         performance_data=performance_data,
         execution_data={
-            "side": side,
+            "side": final_side,
             "signal_id": signal_id,
             "stop_loss_pct": stop_loss_pct,
             "target_pct": target_pct,
             "time_stop_min": time_stop_min,
-            "allow_trade": timing_data["allow_trade"] and quality.is_usable,
+            "allow_trade": final_allow_trade,
             "invalidation_pct": timing_data["invalidation_pct"],
             "expected_move_pct": timing_data["expected_move_pct"],
         },
     )
 
     subject_line = f"{'[TEST MODE] ' if settings.TEST_MODE else ''}10-Min Option Chain Report - {symbol}"
-    if settings.TEST_MODE and (not settings.ENABLE_EMAIL_IN_TEST):
-        print("TEST MODE: Email sending skipped (ENABLE_EMAIL_IN_TEST=False).")
-    else:
-        EmailService.send_email(subject=subject_line, body=report_html)
+    try:
+        saved_path = ReportWebStore.save_report(symbol=symbol, subject=subject_line, report_html=report_html)
+        print(f"Web report saved: {saved_path}")
+    except Exception as exc:
+        print(f"Web report save failed: {exc}")

@@ -14,6 +14,9 @@
   - `python scheduler.py`
 - Single-run debug:
   - `python run_engine.py` (via importer call from your script/test harness)
+- Web report viewer:
+  - `python serve_reports.py --host 127.0.0.1 --port 8080`
+  - open `http://127.0.0.1:8080`
 
 ## 3) Test/Replay Utilities
 - Historical replay:
@@ -40,4 +43,6 @@
   - Ensure `TEST_MODE=False` and `ENABLE_OUTCOME_TRACKING=True`.
 - Calibration stays identity:
   - Confirm enough labeled samples and `ENABLE_CALIBRATION=True`.
+- Viewer shows no report pages:
+  - Run at least one cycle (`scheduler.py`) to generate files in `reports/web/`.
 
