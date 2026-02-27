@@ -299,7 +299,7 @@ switch ($Action) {
         Set-LocalMode $Mode
         Validate-LocalEnv
         Upload-Env
-        Invoke-Remote "cd /opt/oc-chain && if [ -n \"\$(git status --porcelain)\" ]; then echo 'Remote repo has local changes. Resolve on droplet: cd /opt/oc-chain && git status' >&2; exit 2; fi && git fetch origin && git checkout main && git pull --ff-only origin main"
+        Invoke-Remote 'cd /opt/oc-chain && if [ -n "$(git status --porcelain)" ]; then echo "Remote repo has local changes. Resolve on droplet: cd /opt/oc-chain && git status" >&2; exit 2; fi && git fetch origin && git checkout main && git pull --ff-only origin main'
         Invoke-Remote "cd $RepoPath && python3 -m venv .venv && . .venv/bin/activate && pip install --upgrade pip && pip install -r requirements.txt"
         Ensure-ServerDbEnv
         Invoke-Remote "cd $RepoPath && . .venv/bin/activate && PYTHONPATH=$RepoPath python database/apply_schema.py"
