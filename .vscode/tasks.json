@@ -282,6 +282,26 @@
         "focus": true
       },
       "problemMatcher": []
+    },
+    {
+      "label": "OC: Push GitHub + Deploy Prod",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        ".\\ops\\publish-and-deploy.ps1",
+        "-Mode",
+        "prod"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
     }
   ]
 }

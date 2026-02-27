@@ -66,3 +66,11 @@ Useful commands for you
 ssh root@143.110.241.235
 systemctl status oc-chain --no-pager
 journalctl -u oc-chain -f
+
+------------------------------------
+user name:- root
+password:- @!D815egew
+but as ssh key login enabled, so password login disabled.
+------------------------
+where project is loaded?
+/opt/oc-chain/option_chain_system

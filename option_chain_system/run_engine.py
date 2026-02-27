@@ -164,7 +164,7 @@ def run_option_chain(symbol: str) -> None:
         "why_not_now": [],
     }
     if settings.ENABLE_REGIME_V2:
-        summary_history = MarketContextRepository.fetch_recent_summaries(symbol, snapshot_time, limit=24)
+        summary_history = MarketContextRepository.fetch_recent_summaries(symbol, snapshot_time, limit=5)
         regime_data = MarketRegimeEngine.detect(summary_history, df, oi_delta_data)
     print(
         "Regime V2 | "
@@ -366,7 +366,7 @@ def run_option_chain(symbol: str) -> None:
 
     performance_data = {"trades": 0, "hit_rate": 0.0, "expectancy": 0.0, "avg_return_pct": 0.0}
     if settings.ENABLE_OUTCOME_TRACKING:
-        performance_data = TradeOutcomeRepository.fetch_recent_performance(symbol=symbol, lookback_days=20)
+        performance_data = TradeOutcomeRepository.fetch_recent_performance(symbol=symbol, lookback_days=2)
 
     pcr_note = (
         "Low PCR bearish" if pcr < 0.8 else

@@ -10,10 +10,10 @@ import pandas as pd
 class MarketRegimeEngine:
     @staticmethod
     def _atr_proxy(spots: pd.Series) -> float:
-        if len(spots) < 3:
+        if len(spots) < 2:
             return 0.0
         returns = spots.diff().abs().dropna()
-        return float(returns.tail(12).mean() or 0.0)
+        return float(returns.tail(3).mean() or 0.0)
 
     @staticmethod
     def _iv_percentile(df: pd.DataFrame) -> float:
@@ -62,18 +62,18 @@ class MarketRegimeEngine:
         spots = pd.to_numeric(summary_history["spot_price"], errors="coerce").dropna()
         pcr_series = pd.to_numeric(summary_history["pcr"], errors="coerce").dropna()
         atr = MarketRegimeEngine._atr_proxy(spots)
-        avg_spot = float(spots.tail(12).mean() or spots.iloc[-1])
+        avg_spot = float(spots.tail(3).mean() or spots.iloc[-1])
         atr_pct = (atr / max(1.0, avg_spot)) * 100
         iv_pct = MarketRegimeEngine._iv_percentile(option_df)
         breadth = MarketRegimeEngine._breadth(option_df, avg_spot)
         oi_acc = int(oi_delta_data.get("acceleration_probability", 0))
 
-        if len(spots) >= 5:
-            trend_slope = float(spots.tail(5).iloc[-1] - spots.tail(5).iloc[0])
+        if len(spots) >= 2:
+            trend_slope = float(spots.tail(3).iloc[-1] - spots.tail(3).iloc[0])
         else:
             trend_slope = 0.0
 
-        pcr_vol = float(pcr_series.tail(8).std() or 0.0) if len(pcr_series) >= 2 else 0.0
+        pcr_vol = float(pcr_series.tail(3).std() or 0.0) if len(pcr_series) >= 2 else 0.0
 
         label = "RANGE"
         confidence = 50
