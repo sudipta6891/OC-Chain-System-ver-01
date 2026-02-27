@@ -13,6 +13,9 @@ $ErrorActionPreference = "Stop"
 function Exec([string]$Cmd) {
     Write-Host ">> $Cmd"
     Invoke-Expression $Cmd
+    if ($LASTEXITCODE -ne 0) {
+        throw "Command failed with exit code ${LASTEXITCODE}: $Cmd"
+    }
 }
 
 if (-not (Get-Command git -ErrorAction SilentlyContinue)) {

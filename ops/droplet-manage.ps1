@@ -17,6 +17,12 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+function Assert-ExitCode([string]$Context) {
+    if ($LASTEXITCODE -ne 0) {
+        throw "$Context failed with exit code $LASTEXITCODE."
+    }
+}
+
 function Invoke-Remote([string]$Cmd) {
     $clean = $Cmd -replace "`r",""
     $b64 = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($clean))
@@ -27,11 +33,13 @@ import subprocess
 cmd = base64.b64decode('$b64').decode('utf-8')
 subprocess.run(['bash', '-lc', cmd], check=True)
 PY"
+    Assert-ExitCode "Remote command"
 }
 
 function Invoke-RemoteInteractive([string]$Cmd) {
     $clean = $Cmd -replace "`r",""
     ssh -t "$User@$DropletHost" "bash -lc '$clean'"
+    Assert-ExitCode "Remote interactive command"
 }
 
 function Upload-Env() {
@@ -39,6 +47,7 @@ function Upload-Env() {
         throw "Local env file not found: $LocalEnvPath"
     }
     scp $LocalEnvPath "$User@$DropletHost`:$RepoPath/.env"
+    Assert-ExitCode "Upload .env"
     Write-Host "Uploaded .env to ${DropletHost}:$RepoPath/.env"
 }
 
@@ -120,6 +129,7 @@ exec(base64.b64decode("$b64").decode("utf-8"))
 "@ | Set-Content -Path $tmp -Encoding UTF8
     try {
         python $tmp
+        Assert-ExitCode "Set local mode"
     } finally {
         Remove-Item $tmp -ErrorAction SilentlyContinue
     }
@@ -289,7 +299,7 @@ switch ($Action) {
         Set-LocalMode $Mode
         Validate-LocalEnv
         Upload-Env
-        Invoke-Remote "cd /opt/oc-chain && git fetch origin && git checkout main && git pull --ff-only origin main"
+        Invoke-Remote "cd /opt/oc-chain && if [ -n \"\$(git status --porcelain)\" ]; then echo 'Remote repo has local changes. Resolve on droplet: cd /opt/oc-chain && git status' >&2; exit 2; fi && git fetch origin && git checkout main && git pull --ff-only origin main"
         Invoke-Remote "cd $RepoPath && python3 -m venv .venv && . .venv/bin/activate && pip install --upgrade pip && pip install -r requirements.txt"
         Ensure-ServerDbEnv
         Invoke-Remote "cd $RepoPath && . .venv/bin/activate && PYTHONPATH=$RepoPath python database/apply_schema.py"
