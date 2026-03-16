@@ -65,18 +65,6 @@ class ReportBuilder:
             interpretation_text = "Neutral"
             interpretation_color = "#6b7280"
 
-        selected_strikes = sr_window_data.get("selected_strikes", [])
-        ce_oi_by_strike = sr_window_data.get("ce_oi_by_strike", {})
-        pe_oi_by_strike = sr_window_data.get("pe_oi_by_strike", {})
-        sr_rows = ""
-        for i in range(3):
-            strike_value = selected_strikes[i] if i < len(selected_strikes) else "N/A"
-            ce_oi = ce_oi_by_strike.get(strike_value, "N/A") if strike_value != "N/A" else "N/A"
-            pe_oi = pe_oi_by_strike.get(strike_value, "N/A") if strike_value != "N/A" else "N/A"
-            label = "ATM" if i == 0 else f"ATM+{i}"
-            sr_rows += (
-                f"<tr><td><b>{label}</b></td><td>{strike_value}</td><td>{ce_oi}</td><td>{pe_oi}</td></tr>"
-            )
 
         why_now = "".join(f"<li>{x}</li>" for x in regime_data.get("why_now", [])) or "<li>N/A</li>"
         why_not = "".join(f"<li>{x}</li>" for x in regime_data.get("why_not_now", [])) or "<li>N/A</li>"
@@ -122,8 +110,6 @@ class ReportBuilder:
         Support = Strike with Maximum <b>Put OI</b> among ATM, ATM+1, ATM+2
         </p>
         <table cellpadding="6" cellspacing="0" width="100%" style="background:#ffffff;border-radius:6px;">
-            <tr><td><b>Bucket</b></td><td><b>Strike</b></td><td><b>Call OI</b></td><td><b>Put OI</b></td></tr>
-            {sr_rows}
             <tr><td><b>Final Resistance</b></td><td><b style="color:#1e8e3e;">{resistance}</b></td><td colspan="2">Max Call OI strike</td></tr>
             <tr><td><b>Final Support</b></td><td><b style="color:#c62828;">{support}</b></td><td colspan="2">Max Put OI strike</td></tr>
         </table>
