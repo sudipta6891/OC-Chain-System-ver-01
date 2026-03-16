@@ -96,6 +96,18 @@ class ReportBuilder:
             pressure_color = "#c62828"
         else:
             pressure_color = "#6b7280"
+        if call_sum < 0:
+            call_boundary_note = "Call writers exit -> Bullish -> Resistance building"
+            call_boundary_color = "#1e8e3e"
+        else:
+            call_boundary_note = "Call boundary not negative"
+            call_boundary_color = "#6b7280"
+        if put_sum < 0:
+            put_boundary_note = "Put writers exit -> Bearish -> Support building"
+            put_boundary_color = "#c62828"
+        else:
+            put_boundary_note = "Put boundary not negative"
+            put_boundary_color = "#6b7280"
 
 
         why_now = "".join(f"<li>{x}</li>" for x in regime_data.get("why_now", [])) or "<li>N/A</li>"
@@ -160,6 +172,10 @@ class ReportBuilder:
             <tr><td><b>Put Pressure (put_sum)</b></td><td>{put_sum:.2f}</td></tr>
             <tr><td><b>difference = call_sum - put_sum</b></td><td>{pressure_diff:.2f}</td></tr>
             <tr><td><b>Direction</b></td><td><b style="color:{pressure_color};">{pressure_direction}</b></td></tr>
+        </table>
+        <table cellpadding="6" cellspacing="0" width="100%" style="background:#ffffff;border-radius:6px;margin-top:10px;">
+            <tr><td><b>Call Boundary Interpretation</b></td><td><b style="color:{call_boundary_color};">{call_boundary_note}</b></td></tr>
+            <tr><td><b>Put Boundary Interpretation</b></td><td><b style="color:{put_boundary_color};">{put_boundary_note}</b></td></tr>
         </table>
 
         <hr>
