@@ -96,13 +96,16 @@ class ReportBuilder:
             pressure_color = "#c62828"
         else:
             pressure_color = "#6b7280"
-        if call_sum < 0:
+        rounding_factor = 1000.0
+        call_boundary = round((c3 + c2) / rounding_factor, 1)
+        put_boundary = round((p3 + p2) / rounding_factor, 1)
+        if call_boundary < 0:
             call_boundary_note = "Call writers exit -> Bullish -> Resistance building"
             call_boundary_color = "#1e8e3e"
         else:
             call_boundary_note = "Call boundary not negative"
             call_boundary_color = "#6b7280"
-        if put_sum < 0:
+        if put_boundary < 0:
             put_boundary_note = "Put writers exit -> Bearish -> Support building"
             put_boundary_color = "#c62828"
         else:
@@ -174,6 +177,8 @@ class ReportBuilder:
             <tr><td><b>Direction</b></td><td><b style="color:{pressure_color};">{pressure_direction}</b></td></tr>
         </table>
         <table cellpadding="6" cellspacing="0" width="100%" style="background:#ffffff;border-radius:6px;margin-top:10px;">
+            <tr><td><b>Call Boundary ((c3+c2)/1000)</b></td><td>{call_boundary:.1f}</td></tr>
+            <tr><td><b>Put Boundary ((p3+p2)/1000)</b></td><td>{put_boundary:.1f}</td></tr>
             <tr><td><b>Call Boundary Interpretation</b></td><td><b style="color:{call_boundary_color};">{call_boundary_note}</b></td></tr>
             <tr><td><b>Put Boundary Interpretation</b></td><td><b style="color:{put_boundary_color};">{put_boundary_note}</b></td></tr>
         </table>
