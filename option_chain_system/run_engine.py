@@ -123,7 +123,27 @@ def run_option_chain(symbol: str) -> None:
     ce_df, pe_df = basic.split_ce_pe(df)
     total_ce, total_pe = basic.calculate_total_oi(ce_df, pe_df)
     pcr = basic.calculate_pcr(total_pe, total_ce)
-    resistance, support, sr_window_data = advanced.oi_based_levels_atm_window(ce_df, pe_df, atm)
+    baseline_df = MarketContextRepository.fetch_open_oi_by_strike(symbol=symbol, upto_time=snapshot_time)
+    baseline_ce_oi_by_strike = {}
+    baseline_pe_oi_by_strike = {}
+    if not baseline_df.empty:
+        base_ce_df = baseline_df[baseline_df["option_type"] == "CE"]
+        base_pe_df = baseline_df[baseline_df["option_type"] == "PE"]
+        baseline_ce_oi_by_strike = {
+            float(k): float(v)
+            for k, v in base_ce_df.groupby("strike_price", as_index=True)["open_interest"].sum().to_dict().items()
+        }
+        baseline_pe_oi_by_strike = {
+            float(k): float(v)
+            for k, v in base_pe_df.groupby("strike_price", as_index=True)["open_interest"].sum().to_dict().items()
+        }
+    resistance, support, sr_window_data = advanced.oi_based_levels_atm_window(
+        ce_df,
+        pe_df,
+        atm,
+        baseline_ce_oi_by_strike=baseline_ce_oi_by_strike,
+        baseline_pe_oi_by_strike=baseline_pe_oi_by_strike,
+    )
     max_pain = advanced.calculate_max_pain(df)
     structure = interpreter.detect_writing(ce_df, pe_df)
     trap = interpreter.detect_trap(spot, resistance, support)

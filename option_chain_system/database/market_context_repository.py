@@ -6,9 +6,60 @@ from __future__ import annotations
 
 import pandas as pd
 from database.db_connection import DatabaseConnection
+from config.settings import settings
 
 
 class MarketContextRepository:
+    @staticmethod
+    def fetch_open_oi_by_strike(symbol: str, upto_time, market_open_time: str = "09:15:00") -> pd.DataFrame:
+        query = """
+        WITH first_snap AS (
+            SELECT snapshot_time
+            FROM option_chain_snapshot
+            WHERE symbol = %s
+              AND (snapshot_time AT TIME ZONE %s)::date = (%s AT TIME ZONE %s)::date
+              AND (snapshot_time AT TIME ZONE %s)::time >= %s::time
+              AND snapshot_time <= %s
+            ORDER BY snapshot_time ASC
+            LIMIT 1
+        )
+        SELECT strike_price, option_type, open_interest,
+               (SELECT snapshot_time FROM first_snap) AS baseline_snapshot_time
+        FROM option_chain_snapshot
+        WHERE symbol = %s
+          AND snapshot_time = (SELECT snapshot_time FROM first_snap)
+        """
+        conn = DatabaseConnection.get_connection()
+        cursor = conn.cursor()
+        try:
+            tz_name = getattr(settings, "TIMEZONE", "Asia/Kolkata")
+            cursor.execute(
+                query,
+                (
+                    symbol,
+                    tz_name,
+                    upto_time,
+                    tz_name,
+                    tz_name,
+                    market_open_time,
+                    upto_time,
+                    symbol,
+                ),
+            )
+            rows = cursor.fetchall()
+            if not rows:
+                return pd.DataFrame()
+            df = pd.DataFrame(
+                rows,
+                columns=["strike_price", "option_type", "open_interest", "baseline_snapshot_time"],
+            )
+            df["strike_price"] = pd.to_numeric(df["strike_price"], errors="coerce")
+            df["open_interest"] = pd.to_numeric(df["open_interest"], errors="coerce")
+            return df.dropna(subset=["strike_price", "open_interest"]).reset_index(drop=True)
+        finally:
+            cursor.close()
+            DatabaseConnection.release_connection(conn)
+
     @staticmethod
     def fetch_recent_summaries(symbol: str, upto_time, limit: int = 24) -> pd.DataFrame:
         query = """

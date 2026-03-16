@@ -61,6 +61,8 @@ class AdvancedOptionAnalysis:
         ce_df: pd.DataFrame,
         pe_df: pd.DataFrame,
         atm: float,
+        baseline_ce_oi_by_strike: dict | None = None,
+        baseline_pe_oi_by_strike: dict | None = None,
     ) -> tuple[float, float, dict]:
         """
         Determine resistance/support only from ATM, ATM+1, ATM+2 strikes.
@@ -80,16 +82,29 @@ class AdvancedOptionAnalysis:
             if not pe_window.empty
             else {}
         )
-        ce_oi_change_by_strike = (
-            ce_window.groupby("strike_price", as_index=True)["oi_change"].sum().to_dict()
-            if (not ce_window.empty and "oi_change" in ce_window.columns)
-            else {}
-        )
-        pe_oi_change_by_strike = (
-            pe_window.groupby("strike_price", as_index=True)["oi_change"].sum().to_dict()
-            if (not pe_window.empty and "oi_change" in pe_window.columns)
-            else {}
-        )
+        baseline_ce_oi_by_strike = baseline_ce_oi_by_strike or {}
+        baseline_pe_oi_by_strike = baseline_pe_oi_by_strike or {}
+        if baseline_ce_oi_by_strike or baseline_pe_oi_by_strike:
+            ce_oi_change_by_strike = {}
+            pe_oi_change_by_strike = {}
+            for strike in selected_strikes:
+                current_ce_oi = float(ce_oi_by_strike.get(strike, 0.0))
+                current_pe_oi = float(pe_oi_by_strike.get(strike, 0.0))
+                base_ce_oi = float(baseline_ce_oi_by_strike.get(strike, 0.0))
+                base_pe_oi = float(baseline_pe_oi_by_strike.get(strike, 0.0))
+                ce_oi_change_by_strike[float(strike)] = current_ce_oi - base_ce_oi
+                pe_oi_change_by_strike[float(strike)] = current_pe_oi - base_pe_oi
+        else:
+            ce_oi_change_by_strike = (
+                ce_window.groupby("strike_price", as_index=True)["oi_change"].sum().to_dict()
+                if (not ce_window.empty and "oi_change" in ce_window.columns)
+                else {}
+            )
+            pe_oi_change_by_strike = (
+                pe_window.groupby("strike_price", as_index=True)["oi_change"].sum().to_dict()
+                if (not pe_window.empty and "oi_change" in pe_window.columns)
+                else {}
+            )
 
         if ce_oi_by_strike:
             resistance = float(max(ce_oi_by_strike.items(), key=lambda x: x[1])[0])
