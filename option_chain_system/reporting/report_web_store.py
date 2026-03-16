@@ -44,6 +44,66 @@ class ReportWebStore:
     def _slugify_symbol(symbol: str) -> str:
         return re.sub(r"[^A-Za-z0-9._-]+", "_", symbol).strip("_") or "symbol"
 
+    @staticmethod
+    def _runtime_mode_label() -> str:
+        return "TEST" if getattr(settings, "TEST_MODE", False) else "LIVE"
+
+    @classmethod
+    def _today_key(cls) -> str:
+        return datetime.now(tz=cls._app_timezone()).strftime("%Y%m%d")
+
+    @staticmethod
+    def _extract_ts_key_from_meta_name(path: Path) -> str:
+        stem = path.stem
+        if "__" not in stem:
+            return ""
+        return stem.rsplit("__", 1)[-1]
+
+    @classmethod
+    def _prune_history_to_today(cls, base: Path | None = None) -> None:
+        root = base or cls._base_dir()
+        history_root = root / "history"
+        meta_dir = root / "meta"
+        today_key = cls._today_key()
+        app_tz = cls._app_timezone()
+        today_date = datetime.now(tz=app_tz).date()
+
+        def _is_current_day(path: Path, ts_key: str = "") -> bool:
+            if ts_key and ts_key.startswith(f"{today_key}_"):
+                return True
+            try:
+                modified_local = datetime.fromtimestamp(path.stat().st_mtime, tz=app_tz).date()
+                return modified_local == today_date
+            except Exception:
+                return False
+
+        if history_root.exists():
+            for history_file in history_root.rglob("*"):
+                if not history_file.is_file():
+                    continue
+                if not _is_current_day(history_file, history_file.stem):
+                    try:
+                        history_file.unlink()
+                    except Exception:
+                        continue
+            for dir_path in sorted(history_root.rglob("*"), key=lambda p: len(p.parts), reverse=True):
+                if not dir_path.is_dir():
+                    continue
+                try:
+                    if not any(dir_path.iterdir()):
+                        dir_path.rmdir()
+                except Exception:
+                    continue
+
+        if meta_dir.exists():
+            for meta_file in meta_dir.glob("*.json"):
+                ts_key = cls._extract_ts_key_from_meta_name(meta_file)
+                if not _is_current_day(meta_file, ts_key):
+                    try:
+                        meta_file.unlink()
+                    except Exception:
+                        continue
+
     @classmethod
     def save_report(cls, symbol: str, subject: str, report_html: str) -> Path:
         base = cls._base_dir()
@@ -74,9 +134,11 @@ class ReportWebStore:
             "generated_at_iso": now_iso,
             "generated_at_display": now_display,
             "path": f"history/{slug}/{ts_key}.html",
-            "source": "live",
+            "source": "test" if settings.TEST_MODE else "live",
+            "mode": cls._runtime_mode_label(),
         }
         (meta_dir / f"{slug}__{ts_key}.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
+        cls._prune_history_to_today(base=base)
         cls._write_index()
         return report_path
 
@@ -91,6 +153,7 @@ class ReportWebStore:
         history_root = base / "history"
         meta_dir.mkdir(parents=True, exist_ok=True)
         history_root.mkdir(parents=True, exist_ok=True)
+        today_key = cls._today_key()
 
         query = """
             WITH ranked AS (
@@ -139,6 +202,8 @@ class ReportWebStore:
             slug = cls._slugify_symbol(symbol)
             snapshot_local = cls._to_app_timezone(snapshot_time)
             ts_key = snapshot_local.strftime("%Y%m%d_%H%M%S")
+            if snapshot_local.strftime("%Y%m%d") != today_key:
+                continue
             ts_iso, ts_display = cls._format_timestamp(snapshot_local)
             history_dir = history_root / slug
             history_dir.mkdir(parents=True, exist_ok=True)
@@ -188,6 +253,7 @@ class ReportWebStore:
                 "generated_at_display": ts_display,
                 "path": f"history/{slug}/{ts_key}.html",
                 "source": "db",
+                "mode": cls._runtime_mode_label(),
             }
             (meta_dir / f"{slug}__{ts_key}.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
 
@@ -197,6 +263,7 @@ class ReportWebStore:
         meta_dir = base / "meta"
         limit = max(1, int(getattr(settings, "WEB_HISTORY_LIMIT", 20)))
         cls._backfill_from_database(max_rows=limit)
+        cls._prune_history_to_today(base=base)
 
         rows: list[dict] = []
         if meta_dir.exists():
@@ -223,16 +290,20 @@ class ReportWebStore:
         # Ensure selector semantics: only latest row per symbol is shown as live,
         # all older rows are labeled db.
         live_assigned: set[str] = set()
+        latest_source = "test" if settings.TEST_MODE else "live"
         for row in rows:
             symbol = str(row.get("symbol", "UNKNOWN"))
             if symbol not in live_assigned:
-                row["source"] = "live"
+                row["source"] = latest_source
+                row["mode"] = cls._runtime_mode_label()
                 live_assigned.add(symbol)
             else:
                 row["source"] = "db"
+                row["mode"] = cls._runtime_mode_label()
 
         rows_json = json.dumps(rows)
         default_path = rows[0]["path"] if rows else ""
+        mode_label = cls._runtime_mode_label()
         page = f"""<!doctype html>
 <html>
 <head>
@@ -301,23 +372,6 @@ class ReportWebStore:
       border: 1px dashed #345;
       border-radius: 10px;
     }}
-    .footer {{
-      margin-top: 14px;
-      background: linear-gradient(90deg, #15284f, #1f3b75);
-      border: 1px solid #36579c;
-      border-radius: 10px;
-      padding: 12px 14px;
-      text-align: center;
-      color: #ffffff;
-      font-weight: 700;
-      letter-spacing: 0.2px;
-    }}
-    .footer small {{
-      display: block;
-      margin-top: 4px;
-      font-weight: 600;
-      color: #d8e6ff;
-    }}
     a {{
       color: var(--accent);
     }}
@@ -327,7 +381,7 @@ class ReportWebStore:
   <div class="wrap">
     <div class="card">
       <h1 class="title">Option Chain Report Viewer</h1>
-      <p class="hint">Select symbol, then time. Data includes live HTML reports + DB historical snapshots.</p>
+      <p class="hint">Mode: <b>{mode_label}</b> | Select symbol, then time. Data includes generated HTML reports + DB historical snapshots.</p>
       <p class="live-clock">Current Time: <b id="liveCurrentTime">--</b></p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
         <select id="symbolSelect"></select>
@@ -336,10 +390,6 @@ class ReportWebStore:
     </div>
     <div class="card">
       {f"<iframe id='reportFrame' src='{html.escape(default_path)}'></iframe>" if default_path else "<div class='empty'>No generated reports yet. Run one cycle first.</div>"}
-    </div>
-    <div class="footer">
-      Copyrighted to: Sudipta Bhattacharya
-      <small>Contact: +91-9831619260</small>
     </div>
   </div>
   <script>
@@ -381,7 +431,7 @@ class ReportWebStore:
       const filtered = rows.filter(r => (r.symbol || "UNKNOWN") === symbol);
       filtered.sort((a, b) => ((a.generated_at_iso || a.generated_at || "") < (b.generated_at_iso || b.generated_at || "") ? 1 : -1));
       timeEl.innerHTML = filtered.length
-        ? filtered.map((r, i) => `<option value="${{r.path}}"${{i===0 ? " selected" : ""}}>${{r.generated_at_display || r.generated_at}} (${{r.source || "n/a"}})</option>`).join("")
+        ? filtered.map((r, i) => `<option value="${{r.path}}"${{i===0 ? " selected" : ""}}>${{r.generated_at_display || r.generated_at}} (${{r.mode || "LIVE"}}/${{r.source || "n/a"}})</option>`).join("")
         : "<option value=''>No time points</option>";
       if (frame) {{
         frame.src = timeEl.value || "about:blank";
@@ -470,10 +520,6 @@ class ReportWebStore:
     <tr><td><b>Structure</b></td><td>{safe_structure}</td></tr>
     <tr><td><b>Trap Signal</b></td><td>{safe_trap}</td></tr>
   </table>
-  <div style="margin-top:18px;background:#1f3b75;color:#fff;border-radius:10px;padding:12px 14px;text-align:center;font-weight:700;">
-    Copyrighted to: Sudipta Bhattacharya<br>
-    <span style="font-weight:600;color:#d8e6ff;">Contact: +91-9831619260</span>
-  </div>
 </body>
 </html>
 """
@@ -483,6 +529,7 @@ class ReportWebStore:
         safe_symbol = html.escape(symbol)
         safe_subject = html.escape(subject)
         safe_generated_at = html.escape(generated_at)
+        safe_mode = html.escape(ReportWebStore._runtime_mode_label())
         return f"""<!doctype html>
 <html>
 <head>
@@ -492,7 +539,7 @@ class ReportWebStore:
 </head>
 <body>
   <div style="font-family:Segoe UI,Tahoma,sans-serif;background:#0e1320;color:#dce8ff;padding:10px 14px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;">
-    <div><b>{safe_symbol}</b> | Generated: {safe_generated_at}</div>
+    <div><b>{safe_symbol}</b> | Mode: <b>{safe_mode}</b> | Generated: {safe_generated_at}</div>
     <div>Current Time: <b id="liveCurrentTime">--</b></div>
   </div>
   {body}
