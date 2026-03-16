@@ -55,6 +55,15 @@ class ReportBuilder:
         performance_data = performance_data or {}
         execution_data = execution_data or {}
         sr_window_data = sr_window_data or {}
+        if pcr > 1:
+            interpretation_text = "Bullish"
+            interpretation_color = "#1e8e3e"
+        elif pcr < 1:
+            interpretation_text = "Bearish"
+            interpretation_color = "#c62828"
+        else:
+            interpretation_text = "Neutral"
+            interpretation_color = "#6b7280"
 
         selected_strikes = sr_window_data.get("selected_strikes", [])
         ce_oi_by_strike = sr_window_data.get("ce_oi_by_strike", {})
@@ -103,7 +112,7 @@ class ReportBuilder:
             <tr><td><b>Max Pain</b></td><td>{max_pain}</td></tr>
             <tr><td><b>Max Pain Insight</b></td><td>{maxpain_note}</td></tr>
             <tr><td><b>PCR</b></td><td>{pcr}</td></tr>
-            <tr><td><b>PCR Interpretation</b></td><td>{pcr_note}</td></tr>
+            <tr><td><b>Interpretation</b></td><td><b style="color:{interpretation_color};">{interpretation_text}</b></td></tr>
         </table>
 
         <hr>
