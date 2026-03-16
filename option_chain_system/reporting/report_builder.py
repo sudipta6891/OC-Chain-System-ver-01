@@ -32,6 +32,7 @@ class ReportBuilder:
         quality_data: dict | None = None,
         performance_data: dict | None = None,
         execution_data: dict | None = None,
+        sr_window_data: dict | None = None,
     ) -> str:
         replay_block = ""
         if replay_info:
@@ -53,6 +54,20 @@ class ReportBuilder:
         quality_data = quality_data or {}
         performance_data = performance_data or {}
         execution_data = execution_data or {}
+        sr_window_data = sr_window_data or {}
+
+        selected_strikes = sr_window_data.get("selected_strikes", [])
+        ce_oi_by_strike = sr_window_data.get("ce_oi_by_strike", {})
+        pe_oi_by_strike = sr_window_data.get("pe_oi_by_strike", {})
+        sr_rows = ""
+        for i in range(3):
+            strike_value = selected_strikes[i] if i < len(selected_strikes) else "N/A"
+            ce_oi = ce_oi_by_strike.get(strike_value, "N/A") if strike_value != "N/A" else "N/A"
+            pe_oi = pe_oi_by_strike.get(strike_value, "N/A") if strike_value != "N/A" else "N/A"
+            label = "ATM" if i == 0 else f"ATM+{i}"
+            sr_rows += (
+                f"<tr><td><b>{label}</b></td><td>{strike_value}</td><td>{ce_oi}</td><td>{pe_oi}</td></tr>"
+            )
 
         why_now = "".join(f"<li>{x}</li>" for x in regime_data.get("why_now", [])) or "<li>N/A</li>"
         why_not = "".join(f"<li>{x}</li>" for x in regime_data.get("why_not_now", [])) or "<li>N/A</li>"
@@ -91,6 +106,19 @@ class ReportBuilder:
             <tr><td><b>Max Pain Insight</b></td><td>{maxpain_note}</td></tr>
             <tr><td><b>PCR</b></td><td>{pcr}</td></tr>
             <tr><td><b>PCR Interpretation</b></td><td>{pcr_note}</td></tr>
+        </table>
+
+        <hr>
+        <h3>Support/Resistance Calculation (ATM to ATM+2)</h3>
+        <p>
+        Resistance = Strike with Maximum <b>Call OI</b> among ATM, ATM+1, ATM+2<br>
+        Support = Strike with Maximum <b>Put OI</b> among ATM, ATM+1, ATM+2
+        </p>
+        <table cellpadding="6" cellspacing="0" width="100%" style="background:#ffffff;border-radius:6px;">
+            <tr><td><b>Bucket</b></td><td><b>Strike</b></td><td><b>Call OI</b></td><td><b>Put OI</b></td></tr>
+            {sr_rows}
+            <tr><td><b>Final Resistance</b></td><td>{resistance}</td><td colspan="2">Max Call OI strike</td></tr>
+            <tr><td><b>Final Support</b></td><td>{support}</td><td colspan="2">Max Put OI strike</td></tr>
         </table>
 
         <hr>

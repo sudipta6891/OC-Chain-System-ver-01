@@ -194,7 +194,7 @@ class HistoricalTestRunner:
         ce_df, pe_df = basic.split_ce_pe(df)
         total_ce, total_pe = basic.calculate_total_oi(ce_df, pe_df)
         pcr = basic.calculate_pcr(total_pe, total_ce)
-        resistance, support = advanced.oi_based_levels(ce_df, pe_df)
+        resistance, support, sr_window_data = advanced.oi_based_levels_atm_window(ce_df, pe_df, atm)
         max_pain = advanced.calculate_max_pain(df)
         structure = interpreter.detect_writing(ce_df, pe_df)
         trap = interpreter.detect_trap(spot, resistance, support)
@@ -328,6 +328,7 @@ class HistoricalTestRunner:
                 "invalidation_pct": timing_data["invalidation_pct"],
                 "expected_move_pct": timing_data["expected_move_pct"],
             },
+            sr_window_data=sr_window_data,
         )
 
         subject_line = f"[HISTORICAL TEST] {symbol} | {replay_date} {replay_time}"
