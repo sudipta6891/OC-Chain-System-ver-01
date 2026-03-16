@@ -80,6 +80,16 @@ class AdvancedOptionAnalysis:
             if not pe_window.empty
             else {}
         )
+        ce_oi_change_by_strike = (
+            ce_window.groupby("strike_price", as_index=True)["oi_change"].sum().to_dict()
+            if (not ce_window.empty and "oi_change" in ce_window.columns)
+            else {}
+        )
+        pe_oi_change_by_strike = (
+            pe_window.groupby("strike_price", as_index=True)["oi_change"].sum().to_dict()
+            if (not pe_window.empty and "oi_change" in pe_window.columns)
+            else {}
+        )
 
         if ce_oi_by_strike:
             resistance = float(max(ce_oi_by_strike.items(), key=lambda x: x[1])[0])
@@ -91,10 +101,24 @@ class AdvancedOptionAnalysis:
         else:
             support = float(selected_strikes[0])
 
+        call_sum = float(sum(float(v) for v in ce_oi_change_by_strike.values()))
+        put_sum = float(sum(float(v) for v in pe_oi_change_by_strike.values()))
+        if put_sum > call_sum:
+            pressure_direction = "Bullish"
+        elif call_sum > put_sum:
+            pressure_direction = "Bearish"
+        else:
+            pressure_direction = "Neutral"
+
         details = {
             "selected_strikes": [float(x) for x in selected_strikes],
             "ce_oi_by_strike": {float(k): float(v) for k, v in ce_oi_by_strike.items()},
             "pe_oi_by_strike": {float(k): float(v) for k, v in pe_oi_by_strike.items()},
+            "ce_oi_change_by_strike": {float(k): float(v) for k, v in ce_oi_change_by_strike.items()},
+            "pe_oi_change_by_strike": {float(k): float(v) for k, v in pe_oi_change_by_strike.items()},
+            "call_pressure_sum": call_sum,
+            "put_pressure_sum": put_sum,
+            "pressure_direction": pressure_direction,
             "resistance": resistance,
             "support": support,
         }

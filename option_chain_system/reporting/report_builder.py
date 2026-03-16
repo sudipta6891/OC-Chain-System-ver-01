@@ -65,6 +65,38 @@ class ReportBuilder:
             interpretation_text = "Neutral"
             interpretation_color = "#6b7280"
 
+        selected_strikes = sr_window_data.get("selected_strikes", [])
+        ce_oi_change_by_strike = sr_window_data.get("ce_oi_change_by_strike", {})
+        pe_oi_change_by_strike = sr_window_data.get("pe_oi_change_by_strike", {})
+        call_sum = float(sr_window_data.get("call_pressure_sum", 0.0))
+        put_sum = float(sr_window_data.get("put_pressure_sum", 0.0))
+        pressure_direction = str(sr_window_data.get("pressure_direction", "Neutral"))
+
+        def _strike_by_idx(idx: int):
+            return selected_strikes[idx] if idx < len(selected_strikes) else None
+
+        def _oi_change_value(oi_map: dict, strike) -> float:
+            if strike is None:
+                return 0.0
+            return float(oi_map.get(strike, 0.0))
+
+        s0 = _strike_by_idx(0)
+        s1 = _strike_by_idx(1)
+        s2 = _strike_by_idx(2)
+        c1 = _oi_change_value(ce_oi_change_by_strike, s0)
+        c2 = _oi_change_value(ce_oi_change_by_strike, s1)
+        c3 = _oi_change_value(ce_oi_change_by_strike, s2)
+        p1 = _oi_change_value(pe_oi_change_by_strike, s0)
+        p2 = _oi_change_value(pe_oi_change_by_strike, s1)
+        p3 = _oi_change_value(pe_oi_change_by_strike, s2)
+        pressure_diff = call_sum - put_sum
+        if pressure_direction == "Bullish":
+            pressure_color = "#1e8e3e"
+        elif pressure_direction == "Bearish":
+            pressure_color = "#c62828"
+        else:
+            pressure_color = "#6b7280"
+
 
         why_now = "".join(f"<li>{x}</li>" for x in regime_data.get("why_now", [])) or "<li>N/A</li>"
         why_not = "".join(f"<li>{x}</li>" for x in regime_data.get("why_not_now", [])) or "<li>N/A</li>"
@@ -112,6 +144,21 @@ class ReportBuilder:
         <table cellpadding="6" cellspacing="0" width="100%" style="background:#ffffff;border-radius:6px;">
             <tr><td><b>Final Resistance</b></td><td><b style="color:#1e8e3e;">{resistance}</b></td><td colspan="2">Max Call OI strike</td></tr>
             <tr><td><b>Final Support</b></td><td><b style="color:#c62828;">{support}</b></td><td colspan="2">Max Put OI strike</td></tr>
+        </table>
+
+        <hr>
+        <h3>ATM Pressure Calculation</h3>
+        <table cellpadding="6" cellspacing="0" width="100%" style="background:#ffffff;border-radius:6px;">
+            <tr><td><b>c1 (ATM Call OI Change)</b></td><td>{c1:.2f}</td></tr>
+            <tr><td><b>c2 (ATM+1 Call OI Change)</b></td><td>{c2:.2f}</td></tr>
+            <tr><td><b>c3 (ATM+2 Call OI Change)</b></td><td>{c3:.2f}</td></tr>
+            <tr><td><b>Call Pressure (call_sum)</b></td><td>{call_sum:.2f}</td></tr>
+            <tr><td><b>p1 (ATM Put OI Change)</b></td><td>{p1:.2f}</td></tr>
+            <tr><td><b>p2 (ATM+1 Put OI Change)</b></td><td>{p2:.2f}</td></tr>
+            <tr><td><b>p3 (ATM+2 Put OI Change)</b></td><td>{p3:.2f}</td></tr>
+            <tr><td><b>Put Pressure (put_sum)</b></td><td>{put_sum:.2f}</td></tr>
+            <tr><td><b>difference = call_sum - put_sum</b></td><td>{pressure_diff:.2f}</td></tr>
+            <tr><td><b>Direction</b></td><td><b style="color:{pressure_color};">{pressure_direction}</b></td></tr>
         </table>
 
         <hr>
