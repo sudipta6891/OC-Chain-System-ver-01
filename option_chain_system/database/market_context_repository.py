@@ -11,31 +11,6 @@ from config.settings import settings
 
 class MarketContextRepository:
     @staticmethod
-    def fetch_previous_snapshot_oi(symbol: str, snapshot_time) -> pd.DataFrame:
-        query = """
-        SELECT strike_price, option_type, open_interest, snapshot_time
-        FROM option_chain_snapshot
-        WHERE symbol = %s
-          AND snapshot_time < %s
-        ORDER BY snapshot_time DESC
-        LIMIT 500
-        """
-        conn = DatabaseConnection.get_connection()
-        cursor = conn.cursor()
-        try:
-            cursor.execute(query, (symbol, snapshot_time))
-            rows = cursor.fetchall()
-            if not rows:
-                return pd.DataFrame()
-            df = pd.DataFrame(rows, columns=["strike_price", "option_type", "open_interest", "snapshot_time"])
-            df["strike_price"] = pd.to_numeric(df["strike_price"], errors="coerce")
-            df["open_interest"] = pd.to_numeric(df["open_interest"], errors="coerce")
-            return df.dropna(subset=["strike_price", "open_interest"]).reset_index(drop=True)
-        finally:
-            cursor.close()
-            DatabaseConnection.release_connection(conn)
-
-    @staticmethod
     def fetch_open_oi_by_strike(symbol: str, upto_time, market_open_time: str = "09:15:00") -> pd.DataFrame:
         query = """
         WITH first_snap AS (

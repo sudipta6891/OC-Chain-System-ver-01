@@ -148,6 +148,7 @@ class ReportBuilder:
 
         <hr>
         <h3>ATM Pressure Calculation</h3>
+        <p>Cumulative OI change window: <b>09:15 IST to current snapshot</b></p>
         <table cellpadding="6" cellspacing="0" width="100%" style="background:#ffffff;border-radius:6px;">
             <tr><td><b>c1 (ATM Call OI Change)</b></td><td>{c1:.2f}</td></tr>
             <tr><td><b>c2 (ATM+1 Call OI Change)</b></td><td>{c2:.2f}</td></tr>
