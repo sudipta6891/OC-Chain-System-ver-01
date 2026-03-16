@@ -100,8 +100,6 @@ class ReportBuilder:
         <table cellpadding="8" cellspacing="0" width="100%" style="background:#ffffff;border-radius:8px;">
             <tr><td><b>Spot</b></td><td>{spot}</td></tr>
             <tr><td><b>ATM</b></td><td>{atm}</td></tr>
-            <tr><td><b>Resistance</b></td><td>{resistance}</td></tr>
-            <tr><td><b>Support</b></td><td>{support}</td></tr>
             <tr><td><b>Max Pain</b></td><td>{max_pain}</td></tr>
             <tr><td><b>Max Pain Insight</b></td><td>{maxpain_note}</td></tr>
             <tr><td><b>PCR</b></td><td>{pcr}</td></tr>
