@@ -71,6 +71,14 @@ class ReportBuilder:
         call_sum = float(sr_window_data.get("call_pressure_sum", 0.0))
         put_sum = float(sr_window_data.get("put_pressure_sum", 0.0))
         pressure_direction = str(sr_window_data.get("pressure_direction", "Neutral"))
+        sp_plus_4_strike = sr_window_data.get("sp_plus_4_strike")
+        sp_minus_2_strike = sr_window_data.get("sp_minus_2_strike")
+        p4 = float(sr_window_data.get("p4", 0.0))
+        p5 = float(sr_window_data.get("p5", 0.0))
+        p6 = float(sr_window_data.get("p6", 0.0))
+        p7 = float(sr_window_data.get("p7", 0.0))
+        call_itm = sr_window_data.get("call_itm")
+        put_itm = sr_window_data.get("put_itm")
 
         def _strike_by_idx(idx: int):
             return selected_strikes[idx] if idx < len(selected_strikes) else None
@@ -111,6 +119,33 @@ class ReportBuilder:
         else:
             put_boundary_note = "Put boundary not negative"
             put_boundary_color = "#6b7280"
+        put_exit = (put_boundary <= 0) or (put_sum <= 0)
+        call_exit = (call_boundary <= 0) or (call_sum <= 0)
+        put_exit_text = "YES" if put_exit else "NO"
+        call_exit_text = "YES" if call_exit else "NO"
+        put_exit_color = "#c62828" if put_exit else "#6b7280"
+        call_exit_color = "#1e8e3e" if call_exit else "#6b7280"
+        put_exit_note = "Put writers exiting -> bearish signal" if put_exit else "No put-exit signal"
+        call_exit_note = "Call writers exiting -> bullish signal" if call_exit else "No call-exit signal"
+        if isinstance(call_itm, (int, float)):
+            if call_itm > 1:
+                call_itm_signal = "Bullish pressure"
+                call_itm_color = "#1e8e3e"
+            elif call_itm < 1:
+                call_itm_signal = "Bearish pressure"
+                call_itm_color = "#c62828"
+            else:
+                call_itm_signal = "Neutral"
+                call_itm_color = "#6b7280"
+            call_itm_text = f"{float(call_itm):.3f}"
+        else:
+            call_itm_signal = "N/A (division by zero)"
+            call_itm_color = "#6b7280"
+            call_itm_text = "N/A"
+        if isinstance(put_itm, (int, float)):
+            put_itm_text = f"{float(put_itm):.3f}"
+        else:
+            put_itm_text = "N/A"
 
 
         why_now = "".join(f"<li>{x}</li>" for x in regime_data.get("why_now", [])) or "<li>N/A</li>"
@@ -181,6 +216,23 @@ class ReportBuilder:
             <tr><td><b>Put Boundary ((p3+p2)/1000)</b></td><td>{put_boundary:.1f}</td></tr>
             <tr><td><b>Call Boundary Interpretation</b></td><td><b style="color:{call_boundary_color};">{call_boundary_note}</b></td></tr>
             <tr><td><b>Put Boundary Interpretation</b></td><td><b style="color:{put_boundary_color};">{put_boundary_note}</b></td></tr>
+        </table>
+        <table cellpadding="6" cellspacing="0" width="100%" style="background:#ffffff;border-radius:6px;margin-top:10px;">
+            <tr><td><b>SP+4 Strike</b></td><td>{sp_plus_4_strike if sp_plus_4_strike is not None else 'N/A'}</td></tr>
+            <tr><td><b>p4 (Put OI change at SP+4)</b></td><td>{p4:.2f}</td></tr>
+            <tr><td><b>p5 (Call OI change at SP+4)</b></td><td>{p5:.2f}</td></tr>
+            <tr><td><b>Call_ITM = p4 / p5</b></td><td>{call_itm_text}</td></tr>
+            <tr><td><b>Call_ITM Signal</b></td><td><b style="color:{call_itm_color};">{call_itm_signal}</b></td></tr>
+            <tr><td><b>SP-2 Strike</b></td><td>{sp_minus_2_strike if sp_minus_2_strike is not None else 'N/A'}</td></tr>
+            <tr><td><b>p6 (Call OI change at SP-2)</b></td><td>{p6:.2f}</td></tr>
+            <tr><td><b>p7 (Put OI change at SP-2)</b></td><td>{p7:.2f}</td></tr>
+            <tr><td><b>Put_ITM = p6 / p7</b></td><td>{put_itm_text}</td></tr>
+        </table>
+        <table cellpadding="6" cellspacing="0" width="100%" style="background:#ffffff;border-radius:6px;margin-top:10px;">
+            <tr><td><b>Put Exit (put_boundary <= 0 or put_sum <= 0)</b></td><td><b style="color:{put_exit_color};">{put_exit_text}</b></td></tr>
+            <tr><td><b>Put Exit Meaning</b></td><td><b style="color:{put_exit_color};">{put_exit_note}</b></td></tr>
+            <tr><td><b>Call Exit (call_boundary <= 0 or call_sum <= 0)</b></td><td><b style="color:{call_exit_color};">{call_exit_text}</b></td></tr>
+            <tr><td><b>Call Exit Meaning</b></td><td><b style="color:{call_exit_color};">{call_exit_note}</b></td></tr>
         </table>
 
         <hr>
