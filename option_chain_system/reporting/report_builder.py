@@ -124,8 +124,8 @@ class ReportBuilder:
         <table cellpadding="6" cellspacing="0" width="100%" style="background:#ffffff;border-radius:6px;">
             <tr><td><b>Bucket</b></td><td><b>Strike</b></td><td><b>Call OI</b></td><td><b>Put OI</b></td></tr>
             {sr_rows}
-            <tr><td><b>Final Resistance</b></td><td>{resistance}</td><td colspan="2">Max Call OI strike</td></tr>
-            <tr><td><b>Final Support</b></td><td>{support}</td><td colspan="2">Max Put OI strike</td></tr>
+            <tr><td><b>Final Resistance</b></td><td><b style="color:#1e8e3e;">{resistance}</b></td><td colspan="2">Max Call OI strike</td></tr>
+            <tr><td><b>Final Support</b></td><td><b style="color:#c62828;">{support}</b></td><td colspan="2">Max Put OI strike</td></tr>
         </table>
 
         <hr>
