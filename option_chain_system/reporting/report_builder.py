@@ -196,14 +196,6 @@ class ReportBuilder:
         <b>Warnings:</b><ul>{quality_warn}</ul>
         <b>Anomaly Flags:</b><ul>{quality_flags}</ul>
 
-        <hr>
-        <h3>Recent Performance (30m Horizon)</h3>
-        <table cellpadding="6" cellspacing="0" width="100%" style="background:#ffffff;border-radius:6px;">
-            <tr><td><b>Trades</b></td><td>{performance_data.get('trades', 0)}</td></tr>
-            <tr><td><b>Hit Rate</b></td><td>{performance_data.get('hit_rate', 0):.2%}</td></tr>
-            <tr><td><b>Avg Return</b></td><td>{performance_data.get('avg_return_pct', 0):.2f}%</td></tr>
-            <tr><td><b>Expectancy</b></td><td>{performance_data.get('expectancy', 0):.4f}</td></tr>
-        </table>
         </body>
         </html>
         """
